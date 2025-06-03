@@ -1,0 +1,29 @@
+.van-3d-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.van-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.example-text-3d {
+  position: absolute;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #ffffff;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.example-text-3d.visible {
+  opacity: 1;
+}

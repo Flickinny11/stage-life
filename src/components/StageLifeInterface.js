@@ -1,7 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
+import RecordingControls from './audio/RecordingControls';
+import DrumstickAnimation from './3d/DrumstickAnimation';
+import VanAnimation from './3d/VanAnimation';
 import './StageLifeInterface.css';
 
 function StageLifeInterface() {
+  const [showRecording, setShowRecording] = useState(false);
+  const [drumstickHovered, setDrumstickHovered] = useState(false);
+  const [vanHovered, setVanHovered] = useState(false);
+
   return (
     <div className="stage-life-interface">
       <div className="main-container">
@@ -17,31 +24,35 @@ function StageLifeInterface() {
         </header>
 
         <div className="animation-panels">
-          <div className="panel drumsticks-panel glass-effect">
-            <div className="drumsticks-container">
-              <div className="drumstick left"></div>
-              <div className="drumstick right"></div>
-              <div className="live-text">Live</div>
-            </div>
+          <div 
+            className="panel drumsticks-panel glass-effect" 
+            onClick={() => setShowRecording(!showRecording)}
+            onMouseEnter={() => setDrumstickHovered(true)}
+            onMouseLeave={() => setDrumstickHovered(false)}
+          >
+            <DrumstickAnimation isHovered={drumstickHovered} />
           </div>
 
-          <div className="panel van-panel glass-effect">
-            <div className="van-container">
-              <div className="van-body"></div>
-              <div className="van-door left-door"></div>
-              <div className="van-door right-door"></div>
-              <div className="smoke-effect"></div>
-              <div className="example-text">Example</div>
-            </div>
+          <div 
+            className="panel van-panel glass-effect"
+            onMouseEnter={() => setVanHovered(true)}
+            onMouseLeave={() => setVanHovered(false)}
+          >
+            <VanAnimation isHovered={vanHovered} />
           </div>
         </div>
+
+        {showRecording && <RecordingControls />}
 
         <div className="action-buttons">
           <button className="cta-button glass-effect">
             Get Stage-Life - $9
           </button>
-          <button className="demo-button glass-effect">
-            Try Demo
+          <button 
+            className="demo-button glass-effect"
+            onClick={() => setShowRecording(!showRecording)}
+          >
+            {showRecording ? 'Hide Studio' : 'Try Recording Studio'}
           </button>
         </div>
 
