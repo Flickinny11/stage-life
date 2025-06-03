@@ -1,0 +1,87 @@
+{
+  "name": "stage-life",
+  "version": "1.0.0",
+  "description": "Record. Better. - Professional live recording, mixing, and mastering solution with Logic Pro integration",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "electron": "electron .",
+    "electron-dev": "ELECTRON_IS_DEV=1 electron .",
+    "electron-pack": "electron-builder",
+    "preelectron-pack": "npm run build"
+  },
+  "keywords": [
+    "audio",
+    "music",
+    "recording",
+    "mastering",
+    "mixing",
+    "live",
+    "performance",
+    "logic-pro",
+    "ai",
+    "daw"
+  ],
+  "author": "Stage-Life",
+  "license": "MIT",
+  "homepage": "./",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "three": "^0.153.0",
+    "gsap": "^3.12.2",
+    "tone": "^14.7.77",
+    "web-audio-api": "^0.2.2",
+    "stripe": "^12.9.0",
+    "axios": "^1.4.0",
+    "socket.io-client": "^4.7.1"
+  },
+  "devDependencies": {
+    "electron": "^25.2.0",
+    "electron-builder": "^24.4.0",
+    "@types/three": "^0.153.0"
+  },
+  "build": {
+    "appId": "com.stage-life.app",
+    "productName": "Stage-Life",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "build/**/*",
+      "node_modules/**/*",
+      "public/electron.js"
+    ],
+    "mac": {
+      "category": "public.app-category.music",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ]
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
