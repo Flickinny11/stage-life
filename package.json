@@ -83,5 +83,45 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "mcp": {
+    "servers": {
+      "memory": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-memory"],
+        "description": "Persistent memory for development context"
+      },
+      "filesystem": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+        "description": "File operations with audio file awareness"
+      },
+      "github": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "description": "GitHub integration for Stage-Life repository"
+      },
+      "everything-search": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-everything"],
+        "description": "Advanced search for audio development resources"
+      },
+      "puppeteer": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+        "description": "Web crawling for documentation and research"
+      }
+    },
+    "context": {
+      "projectType": "professional-audio-platform",
+      "techStack": ["react", "typescript", "electron", "juce", "three.js", "web-audio-api"],
+      "platforms": ["web", "macos", "windows", "ipad", "logic-pro-plugin"],
+      "focusAreas": ["live-recording", "real-time-processing", "ai-enhancement"],
+      "constraints": {
+        "openSourceOnly": true,
+        "noExternalAPIs": true,
+        "professionalAudioStandards": true
+      }
+    }
   }
 }
