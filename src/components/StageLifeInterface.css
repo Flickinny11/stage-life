@@ -44,6 +44,18 @@
   margin-right: auto;
 }
 
+.activation-status {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  margin-top: 15px;
+  display: inline-block;
+}
+
 /* Animation Panels */
 .animation-panels {
   display: flex;
@@ -215,11 +227,18 @@
   cursor: pointer;
   transition: all 0.3s ease;
   color: #ffffff;
+  min-width: 160px;
 }
 
 .cta-button {
   background: linear-gradient(45deg, #4CAF50, #45a049);
   box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.cta-button.activated {
+  background: linear-gradient(45deg, #2E7D32, #1B5E20);
+  box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+  cursor: default;
 }
 
 .demo-button {

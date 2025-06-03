@@ -1,0 +1,295 @@
+.plugin-connection {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 25px;
+  text-align: left;
+}
+
+.plugin-connection h3 {
+  text-align: center;
+  margin: 0 0 25px 0;
+  color: #ffffff;
+  font-size: 1.6rem;
+}
+
+.plugin-connection h4 {
+  color: #ffffff;
+  margin: 0 0 15px 0;
+  font-size: 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 5px;
+}
+
+/* Connection Status */
+.connection-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-indicator.connected {
+  color: #4CAF50;
+}
+
+.status-indicator.connected .status-dot {
+  background: #4CAF50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+  animation: pulse-green 2s infinite;
+}
+
+.status-indicator.disconnected {
+  color: #ff6b6b;
+}
+
+.status-indicator.disconnected .status-dot {
+  background: #ff6b6b;
+}
+
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+.connect-button {
+  padding: 10px 20px;
+  background: linear-gradient(45deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.connect-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+/* Plugin Controls */
+.plugin-controls {
+  display: grid;
+  gap: 25px;
+}
+
+.recording-section,
+.audio-monitoring,
+.plugin-parameters {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+/* Recording Controls */
+.plugin-recording-status {
+  margin-bottom: 15px;
+}
+
+.recording-indicator {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.recording-indicator.active {
+  color: #ff4444;
+  animation: pulse 1s infinite;
+}
+
+.recording-indicator.inactive {
+  color: #4CAF50;
+}
+
+.plugin-record-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.plugin-record-btn.start {
+  background: linear-gradient(45deg, #ff4444, #cc3333);
+}
+
+.plugin-record-btn.stop {
+  background: linear-gradient(45deg, #666666, #555555);
+}
+
+.plugin-record-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Audio Monitoring */
+.level-meter {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.level-meter label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.level-bar {
+  flex: 1;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.level-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #FFC107, #ff4444);
+  transition: width 0.1s ease;
+  border-radius: 10px;
+}
+
+.level-value {
+  color: #4CAF50;
+  font-weight: bold;
+  min-width: 50px;
+}
+
+.data-status {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Parameters */
+.parameter-control {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.parameter-control label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  min-width: 100px;
+}
+
+.parameter-slider {
+  flex: 1;
+  height: 5px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.parameter-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #4CAF50;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+}
+
+/* Plugin Info */
+.plugin-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.info-value {
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* Plugin Features */
+.plugin-features {
+  margin-top: 25px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.plugin-features ul {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+}
+
+.plugin-features li {
+  padding: 8px 0;
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.plugin-features li:last-child {
+  border-bottom: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .plugin-connection {
+    margin: 20px;
+    padding: 15px;
+  }
+  
+  .connection-status {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .level-meter {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .parameter-control {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .plugin-info {
+    grid-template-columns: 1fr;
+  }
+}
