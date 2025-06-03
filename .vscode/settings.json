@@ -1,0 +1,85 @@
+{
+    "chat.agent.maxRequests": 500000,
+    "github.copilot.chat.agent.thinkingTool": true,
+    "github.copilot.chat.codesearch.enabled": true,
+    "chat.tools.autoApprove": true,
+    
+    // MCP Server Configurations - Free Servers Only
+    "mcpsx.mcpServers": {
+        "everything-search": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-everything"]
+        },
+        "puppeteer-crawl": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+        },
+        "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"]
+        },
+        "filesystem": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Volumes/Logan T7 Touch/2 four the show/matchering"]
+        },
+        "memory": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-memory"]
+        }
+    },
+    
+    // Agent Smith MCP Configuration - Free Only
+    "agentsmith.mcpServers": [
+        {
+            "name": "everything-search",
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-everything"]
+        },
+        {
+            "name": "puppeteer-crawl",
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+        },
+        {
+            "name": "github-public",
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"]
+        }
+    ],
+    
+    // Copilot MCP Configuration - Free Only
+    "copilotMcp.servers": {
+        "everything": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-everything"]
+        },
+        "puppeteer": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+        },
+        "memory": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-memory"]
+        },
+        "github": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"]
+        }
+    },
+    
+    // Enable enhanced web search features
+    "websearchforcopilot.enabled": true,
+    "websearchforcopilot.searchEngine": "brave",
+    
+    // Enhanced Copilot features
+    "github.copilot.enable": {
+        "*": true,
+        "yaml": true,
+        "plaintext": true,
+        "markdown": true,
+        "json": true,
+        "jsonc": true
+    },
+    "websearch.preferredEngine": "bing",
+    "websearch.useSearchResultsDirectly": true
+}
