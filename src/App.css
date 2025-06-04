@@ -1,0 +1,22 @@
+.App {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #87CEEB 0%, #E0F6FF 100%);
+  color: #ffffff;
+}
+
+.stage-life-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
