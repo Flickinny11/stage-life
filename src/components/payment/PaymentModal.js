@@ -1,16 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import StripePayment from '../../payment/StripePayment';
 import './PaymentModal.css';
 
 function PaymentModal({ isOpen, onClose, onPaymentSuccess }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const [stripePayment, setStripePayment] = useState(null);
+  const [paymentElement, setPaymentElement] = useState(null);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     email: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
     name: ''
   });
+
+  useEffect(() => {
+    if (isOpen && !stripePayment) {
+      initializeStripe();
+    }
+  }, [isOpen]);
+
+  const initializeStripe = async () => {
+    try {
+      const stripe = new StripePayment();
+      const initialized = await stripe.initialize();
+      
+      if (initialized) {
+        setStripePayment(stripe);
+        console.log('Stripe payment system ready');
+      } else {
+        setError('Failed to initialize payment system');
+      }
+    } catch (error) {
+      console.error('Stripe initialization error:', error);
+      setError('Payment system unavailable');
+    }
+  };
 
   const handleInputChange = (e) => {
     setFormData({
@@ -19,35 +43,77 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess }) {
     });
   };
 
-  const processPayment = async () => {
+  // Fallback methods for demo mode when Stripe is not available
+  const processSimulatedPayment = async () => {
     setIsProcessing(true);
     
     try {
-      // Simulate payment processing
-      // In production, this would integrate with Stripe
-      console.log('Processing payment for Stage-Life...', formData);
+      console.log('Processing simulated payment...', formData);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Simulate processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Generate device activation key
+      // Generate activation key
       const activationKey = generateActivationKey();
       
-      // Store activation locally (in production, this would be server-validated)
+      // Store activation locally
       localStorage.setItem('stage-life-activation', JSON.stringify({
         email: formData.email,
         activationKey: activationKey,
         purchaseDate: new Date().toISOString(),
-        deviceId: getDeviceFingerprint()
+        deviceId: getDeviceFingerprint(),
+        paymentMethod: 'demo'
       }));
 
       setIsProcessing(false);
       onPaymentSuccess(activationKey);
       onClose();
     } catch (error) {
-      console.error('Payment failed:', error);
+      console.error('Simulated payment failed:', error);
       setIsProcessing(false);
-      alert('Payment failed. Please try again.');
+      setError('Payment simulation failed. Please try again.');
+    }
+  };
+
+  const processPayment = async () => {
+    if (!stripePayment || !stripePayment.isReady) {
+      setError('Payment system not ready');
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+    
+    try {
+      console.log('Creating payment intent...');
+      
+      // Create payment intent
+      const { clientSecret } = await stripePayment.createPaymentIntent(900, {
+        customerEmail: formData.email,
+        customerName: formData.name
+      });
+
+      console.log('Processing payment with Stripe...');
+      
+      // Process payment (this will use the simulated backend for now)
+      const result = await stripePayment.processPayment(paymentElement, {
+        email: formData.email,
+        name: formData.name
+      });
+
+      if (result.success) {
+        console.log('Payment successful!', result);
+        
+        setIsProcessing(false);
+        onPaymentSuccess(result.activationKey);
+        onClose();
+      } else {
+        throw new Error('Payment failed');
+      }
+    } catch (error) {
+      console.error('Payment failed:', error);
+      setError(error.message || 'Payment failed. Please try again.');
+      setIsProcessing(false);
     }
   };
 
@@ -62,31 +128,8 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess }) {
   };
 
   const getDeviceFingerprint = () => {
-    // Simple device fingerprint for demo
     const navigator_info = navigator.userAgent + navigator.language + screen.width + screen.height;
     return btoa(navigator_info).substring(0, 16);
-  };
-
-  const formatCardNumber = (value) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    const matches = v.match(/\d{4,16}/g);
-    const match = matches && matches[0] || '';
-    const parts = [];
-
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
-
-    if (parts.length) {
-      return parts.join(' ');
-    } else {
-      return v;
-    }
-  };
-
-  const handleCardNumberChange = (e) => {
-    const formatted = formatCardNumber(e.target.value);
-    setFormData({ ...formData, cardNumber: formatted });
   };
 
   if (!isOpen) return null;
@@ -150,47 +193,7 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess }) {
                 </div>
 
                 <div className="form-group">
-                  <label>Card Number</label>
-                  <input
-                    type="text"
-                    name="cardNumber"
-                    value={formData.cardNumber}
-                    onChange={handleCardNumberChange}
-                    placeholder="1234 5678 9012 3456"
-                    maxLength="19"
-                    required
-                  />
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Expiry Date</label>
-                    <input
-                      type="text"
-                      name="expiryDate"
-                      value={formData.expiryDate}
-                      onChange={handleInputChange}
-                      placeholder="MM/YY"
-                      maxLength="5"
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>CVV</label>
-                    <input
-                      type="text"
-                      name="cvv"
-                      value={formData.cvv}
-                      onChange={handleInputChange}
-                      placeholder="123"
-                      maxLength="4"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label>Cardholder Name</label>
+                  <label>Full Name</label>
                   <input
                     type="text"
                     name="name"
@@ -200,6 +203,32 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess }) {
                     required
                   />
                 </div>
+
+                {error && (
+                  <div className="error-message">
+                    ⚠️ {error}
+                  </div>
+                )}
+
+                {stripePayment && stripePayment.isReady ? (
+                  <div className="stripe-form">
+                    <p className="payment-info">
+                      💳 Secure payment powered by Stripe
+                    </p>
+                    <div id="stripe-payment-element">
+                      {/* Stripe Elements would be mounted here in production */}
+                      <div className="stripe-placeholder">
+                        <p>🔒 Stripe payment form would appear here</p>
+                        <p>Currently using demo mode</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="demo-mode-notice">
+                    <p>🧪 Demo Mode - No real payment required</p>
+                    <p>Click purchase to simulate activation</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -211,8 +240,8 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess }) {
 
             <button 
               className="purchase-button"
-              onClick={processPayment}
-              disabled={isProcessing}
+              onClick={stripePayment && stripePayment.isReady ? processPayment : processSimulatedPayment}
+              disabled={isProcessing || !formData.email || !formData.name}
             >
               {isProcessing ? (
                 <span>
@@ -220,7 +249,9 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess }) {
                   Processing Payment...
                 </span>
               ) : (
-                `Purchase Stage-Life - $9.00`
+                stripePayment && stripePayment.isReady ? 
+                  `Purchase Stage-Life - ${stripePayment.formattedAmount}` :
+                  `Demo Purchase - $9.00`
               )}
             </button>
 
@@ -228,6 +259,12 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess }) {
               <div className="security-item">🔒 Secure SSL encryption</div>
               <div className="security-item">✅ 30-day money-back guarantee</div>
               <div className="security-item">📱 Instant activation</div>
+              {stripePayment && stripePayment.isReady && (
+                <div className="security-item">💳 Powered by Stripe</div>
+              )}
+              {(!stripePayment || !stripePayment.isReady) && (
+                <div className="security-item">🧪 Demo mode active</div>
+              )}
             </div>
           </div>
         </div>
