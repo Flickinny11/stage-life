@@ -29,21 +29,23 @@
   "license": "MIT",
   "homepage": "./",
   "dependencies": {
+    "@stripe/stripe-js": "^7.3.1",
+    "@tensorflow/tfjs": "^4.22.0",
+    "axios": "^1.4.0",
+    "gsap": "^3.12.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "three": "^0.153.0",
-    "gsap": "^3.12.2",
-    "tone": "^14.7.77",
-    "web-audio-api": "^0.2.2",
+    "socket.io-client": "^4.7.1",
     "stripe": "^12.9.0",
-    "axios": "^1.4.0",
-    "socket.io-client": "^4.7.1"
+    "three": "^0.153.0",
+    "tone": "^14.7.77",
+    "web-audio-api": "^0.2.2"
   },
   "devDependencies": {
+    "@types/three": "^0.153.0",
     "electron": "^25.2.0",
-    "electron-builder": "^24.4.0",
-    "@types/three": "^0.153.0"
+    "electron-builder": "^24.4.0"
   },
   "build": {
     "appId": "com.stage-life.app",
@@ -61,7 +63,10 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ]
     },
@@ -88,35 +93,68 @@
     "servers": {
       "memory": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-memory"],
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-memory"
+        ],
         "description": "Persistent memory for development context"
       },
       "filesystem": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-filesystem",
+          "."
+        ],
         "description": "File operations with audio file awareness"
       },
       "github": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-github"
+        ],
         "description": "GitHub integration for Stage-Life repository"
       },
       "everything-search": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-everything"],
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-everything"
+        ],
         "description": "Advanced search for audio development resources"
       },
       "puppeteer": {
         "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-puppeteer"
+        ],
         "description": "Web crawling for documentation and research"
       }
     },
     "context": {
       "projectType": "professional-audio-platform",
-      "techStack": ["react", "typescript", "electron", "juce", "three.js", "web-audio-api"],
-      "platforms": ["web", "macos", "windows", "ipad", "logic-pro-plugin"],
-      "focusAreas": ["live-recording", "real-time-processing", "ai-enhancement"],
+      "techStack": [
+        "react",
+        "typescript",
+        "electron",
+        "juce",
+        "three.js",
+        "web-audio-api"
+      ],
+      "platforms": [
+        "web",
+        "macos",
+        "windows",
+        "ipad",
+        "logic-pro-plugin"
+      ],
+      "focusAreas": [
+        "live-recording",
+        "real-time-processing",
+        "ai-enhancement"
+      ],
       "constraints": {
         "openSourceOnly": true,
         "noExternalAPIs": true,

@@ -1,3 +1,7 @@
+import ProfessionalAudioEngine from '../../audio/engine/ProfessionalAudioEngine';
+import AudioAI from '../../ai/AudioAI';
+import { errorHandler, AudioError, AudioValidator, performanceMonitor } from '../../utils/ErrorHandling';
+
 class AudioEngine {
   constructor() {
     this.audioContext = null;
@@ -8,27 +12,67 @@ class AudioEngine {
     this.analyser = null;
     this.dataArray = null;
     this.gainNode = null;
+    
+    // Enhanced capabilities
+    this.professionalEngine = new ProfessionalAudioEngine();
+    this.audioAI = new AudioAI();
+    this.isProfessionalMode = false;
+    
+    // Real-time analysis data
+    this.analysisData = {
+      lufs: 0,
+      truePeak: 0,
+      dynamicRange: 0,
+      frequencies: null
+    };
   }
 
   async initialize() {
     try {
-      // Initialize Audio Context
+      // Initialize basic Audio Context first
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
       
       if (this.audioContext.state === 'suspended') {
         await this.audioContext.resume();
       }
 
-      console.log('Audio Engine initialized successfully');
+      // Initialize professional engine and AI
+      await this.professionalEngine.initialize();
+      await this.audioAI.initialize();
+
+      // Start performance monitoring
+      performanceMonitor.start();
+
+      console.log('Enhanced Audio Engine initialized successfully');
+      console.log(`Sample Rate: ${this.audioContext.sampleRate}Hz`);
+      console.log(`Professional Engine: ${this.professionalEngine.isReady ? 'Ready' : 'Not Ready'}`);
+      console.log(`AI Processing: ${this.audioAI.isReady ? 'Ready' : 'Not Ready'}`);
+      
       return true;
     } catch (error) {
-      console.error('Failed to initialize Audio Engine:', error);
+      const audioError = new AudioError(
+        'Failed to initialize Enhanced Audio Engine',
+        'INIT_FAILED',
+        { originalError: error.message }
+      );
+      errorHandler.logError(audioError, { component: 'AudioEngine', method: 'initialize' });
       return false;
     }
   }
 
   async requestMicrophoneAccess() {
     try {
+      // Use professional engine if available
+      if (this.professionalEngine.isReady) {
+        console.log('Using professional audio engine for microphone access');
+        const success = await this.professionalEngine.requestMicrophoneAccess();
+        if (success) {
+          this.isProfessionalMode = true;
+          return true;
+        }
+      }
+
+      // Fallback to basic implementation
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: false,
@@ -42,7 +86,16 @@ class AudioEngine {
       this.setupAudioNodes(stream);
       return true;
     } catch (error) {
-      console.error('Failed to access microphone:', error);
+      const audioError = new AudioError(
+        'Failed to access microphone',
+        'MIC_ACCESS_DENIED',
+        { originalError: error.message }
+      );
+      errorHandler.logError(audioError, { 
+        component: 'AudioEngine', 
+        method: 'requestMicrophoneAccess',
+        permissions: navigator.permissions ? 'available' : 'not available'
+      });
       return false;
     }
   }
@@ -72,7 +125,14 @@ class AudioEngine {
     }
 
     try {
-      // Setup MediaRecorder for high-quality recording
+      // Use professional engine if available
+      if (this.isProfessionalMode && this.professionalEngine.isReady) {
+        console.log('Starting professional recording');
+        this.professionalEngine.createMultiTrackRecorder();
+        return this.professionalEngine.startRecording();
+      }
+
+      // Fallback to basic recording
       this.mediaRecorder = new MediaRecorder(this.microphone, {
         mimeType: 'audio/webm;codecs=opus',
         audioBitsPerSecond: 128000
@@ -90,10 +150,10 @@ class AudioEngine {
         this.processRecording();
       };
 
-      this.mediaRecorder.start(100); // Collect data every 100ms
+      this.mediaRecorder.start(100);
       this.isRecording = true;
       
-      console.log('Recording started');
+      console.log('Basic recording started');
       return true;
     } catch (error) {
       console.error('Failed to start recording:', error);
@@ -102,15 +162,25 @@ class AudioEngine {
   }
 
   stopRecording() {
-    if (!this.isRecording || !this.mediaRecorder) {
+    if (!this.isRecording) {
       return false;
     }
 
-    this.mediaRecorder.stop();
-    this.isRecording = false;
-    
-    console.log('Recording stopped');
-    return true;
+    // Use professional engine if available
+    if (this.isProfessionalMode && this.professionalEngine.isReady) {
+      console.log('Stopping professional recording');
+      return this.professionalEngine.stopRecording();
+    }
+
+    // Fallback to basic recording
+    if (this.mediaRecorder) {
+      this.mediaRecorder.stop();
+      this.isRecording = false;
+      console.log('Basic recording stopped');
+      return true;
+    }
+
+    return false;
   }
 
   processRecording() {
@@ -149,6 +219,24 @@ class AudioEngine {
   }
 
   getAudioData() {
+    // Use professional analysis if available
+    if (this.isProfessionalMode && this.professionalEngine.isReady) {
+      const analysis = this.professionalEngine.analyzeAudio();
+      if (analysis) {
+        this.analysisData = analysis;
+        return {
+          frequency: analysis.frequencies,
+          sampleRate: this.professionalEngine.sampleRate,
+          timestamp: analysis.timestamp,
+          lufs: analysis.lufs,
+          truePeak: analysis.truePeak,
+          dynamicRange: analysis.dynamicRange,
+          latency: this.professionalEngine.latency
+        };
+      }
+    }
+
+    // Fallback to basic analysis
     if (!this.analyser || !this.dataArray) {
       return null;
     }
@@ -157,21 +245,80 @@ class AudioEngine {
     return {
       frequency: Array.from(this.dataArray),
       sampleRate: this.audioContext.sampleRate,
-      timestamp: this.audioContext.currentTime
+      timestamp: this.audioContext.currentTime,
+      lufs: this.analysisData.lufs,
+      truePeak: this.analysisData.truePeak,
+      dynamicRange: this.analysisData.dynamicRange
     };
   }
 
   setGain(value) {
-    if (this.gainNode) {
-      this.gainNode.gain.value = value;
+    try {
+      // Validate gain value
+      AudioValidator.validateGain(value);
+      
+      // Use professional engine if available
+      if (this.isProfessionalMode && this.professionalEngine.isReady) {
+        this.professionalEngine.setGain(value);
+      }
+      
+      // Also set basic gain
+      if (this.gainNode) {
+        this.gainNode.gain.value = value;
+      }
+    } catch (error) {
+      if (error.name === 'ValidationError') {
+        errorHandler.logError(error, { 
+          component: 'AudioEngine', 
+          method: 'setGain',
+          value: value
+        });
+      } else {
+        const audioError = new AudioError(
+          'Failed to set gain',
+          'GAIN_SET_FAILED',
+          { value, originalError: error.message }
+        );
+        errorHandler.logError(audioError, { component: 'AudioEngine', method: 'setGain' });
+      }
     }
   }
 
   async applyAIProcessing(audioBlob) {
-    // Placeholder for AI processing integration
-    // This will be enhanced with local AI models in Phase 3
-    console.log('AI processing placeholder - ready for enhancement');
-    return audioBlob;
+    if (!this.audioAI.isReady) {
+      console.log('AI processing not available - using basic processing');
+      return audioBlob;
+    }
+
+    try {
+      // Convert blob to audio buffer for AI processing
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+      const audioData = audioBuffer.getChannelData(0);
+
+      console.log('Applying AI processing to audio...');
+      
+      // Get AI analysis and suggestions
+      const analysis = await this.audioAI.analyzeAudio(audioData);
+      const eqSuggestions = await this.audioAI.suggestEQ(audioData);
+      
+      if (analysis) {
+        console.log('AI Audio Analysis:', analysis);
+      }
+      
+      if (eqSuggestions && this.isProfessionalMode) {
+        console.log('Applying AI EQ suggestions:', eqSuggestions);
+        // Apply AI-suggested EQ settings
+        this.professionalEngine.updateEQ('low', eqSuggestions.lowFreq, eqSuggestions.lowGain);
+        this.professionalEngine.updateEQ('mid', eqSuggestions.midFreq, eqSuggestions.midGain);
+        this.professionalEngine.updateEQ('high', eqSuggestions.highFreq, eqSuggestions.highGain);
+      }
+
+      return audioBlob;
+    } catch (error) {
+      console.error('AI processing failed:', error);
+      return audioBlob;
+    }
   }
 
   destroy() {
@@ -187,8 +334,88 @@ class AudioEngine {
       this.audioContext.close();
     }
 
+    // Cleanup professional engine and AI
+    if (this.professionalEngine) {
+      this.professionalEngine.destroy();
+    }
+    
+    if (this.audioAI) {
+      this.audioAI.dispose();
+    }
+
     this.isRecording = false;
-    console.log('Audio Engine destroyed');
+    this.isProfessionalMode = false;
+    console.log('Enhanced Audio Engine destroyed');
+  }
+
+  // New methods for professional features
+  updateEQ(band, frequency, gain, Q = 0.7) {
+    try {
+      AudioValidator.validateEQParameters(band, frequency, gain, Q);
+      
+      if (this.isProfessionalMode && this.professionalEngine.isReady) {
+        this.professionalEngine.updateEQ(band, frequency, gain, Q);
+      }
+    } catch (error) {
+      if (error.name === 'ValidationError') {
+        errorHandler.logError(error, { 
+          component: 'AudioEngine', 
+          method: 'updateEQ',
+          parameters: { band, frequency, gain, Q }
+        });
+      }
+    }
+  }
+
+  updateCompressor(threshold, ratio, attack, release, knee) {
+    try {
+      AudioValidator.validateCompressorParameters(threshold, ratio, attack, release, knee);
+      
+      if (this.isProfessionalMode && this.professionalEngine.isReady) {
+        this.professionalEngine.updateCompressor(threshold, ratio, attack, release, knee);
+      }
+    } catch (error) {
+      if (error.name === 'ValidationError') {
+        errorHandler.logError(error, { 
+          component: 'AudioEngine', 
+          method: 'updateCompressor',
+          parameters: { threshold, ratio, attack, release, knee }
+        });
+      }
+    }
+  }
+
+  scheduleEvent(callback, time) {
+    if (this.isProfessionalMode && this.professionalEngine.isReady) {
+      this.professionalEngine.scheduleEvent(callback, time);
+    }
+  }
+
+  // Getters for enhanced capabilities
+  get isProfessional() {
+    return this.isProfessionalMode && this.professionalEngine.isReady;
+  }
+
+  get hasAI() {
+    return this.audioAI.isReady;
+  }
+
+  get latency() {
+    if (this.isProfessionalMode && this.professionalEngine.isReady) {
+      return this.professionalEngine.latency;
+    }
+    return this.audioContext ? this.audioContext.baseLatency * 1000 : 0;
+  }
+
+  get capabilities() {
+    return {
+      professional: this.isProfessional,
+      ai: this.hasAI,
+      multiTrack: this.isProfessional,
+      realTimeAnalysis: this.isProfessional,
+      latency: this.latency,
+      sampleRate: this.audioContext ? this.audioContext.sampleRate : 0
+    };
   }
 }
 
