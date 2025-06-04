@@ -1,5 +1,6 @@
 import ProfessionalAudioEngine from '../../audio/engine/ProfessionalAudioEngine';
 import AudioAI from '../../ai/AudioAI';
+import { errorHandler, AudioError, AudioValidator, performanceMonitor } from '../../utils/ErrorHandling';
 
 class AudioEngine {
   constructor() {
@@ -39,6 +40,9 @@ class AudioEngine {
       await this.professionalEngine.initialize();
       await this.audioAI.initialize();
 
+      // Start performance monitoring
+      performanceMonitor.start();
+
       console.log('Enhanced Audio Engine initialized successfully');
       console.log(`Sample Rate: ${this.audioContext.sampleRate}Hz`);
       console.log(`Professional Engine: ${this.professionalEngine.isReady ? 'Ready' : 'Not Ready'}`);
@@ -46,7 +50,12 @@ class AudioEngine {
       
       return true;
     } catch (error) {
-      console.error('Failed to initialize Enhanced Audio Engine:', error);
+      const audioError = new AudioError(
+        'Failed to initialize Enhanced Audio Engine',
+        'INIT_FAILED',
+        { originalError: error.message }
+      );
+      errorHandler.logError(audioError, { component: 'AudioEngine', method: 'initialize' });
       return false;
     }
   }
@@ -77,7 +86,16 @@ class AudioEngine {
       this.setupAudioNodes(stream);
       return true;
     } catch (error) {
-      console.error('Failed to access microphone:', error);
+      const audioError = new AudioError(
+        'Failed to access microphone',
+        'MIC_ACCESS_DENIED',
+        { originalError: error.message }
+      );
+      errorHandler.logError(audioError, { 
+        component: 'AudioEngine', 
+        method: 'requestMicrophoneAccess',
+        permissions: navigator.permissions ? 'available' : 'not available'
+      });
       return false;
     }
   }
@@ -235,14 +253,34 @@ class AudioEngine {
   }
 
   setGain(value) {
-    // Use professional engine if available
-    if (this.isProfessionalMode && this.professionalEngine.isReady) {
-      this.professionalEngine.setGain(value);
-    }
-    
-    // Also set basic gain
-    if (this.gainNode) {
-      this.gainNode.gain.value = value;
+    try {
+      // Validate gain value
+      AudioValidator.validateGain(value);
+      
+      // Use professional engine if available
+      if (this.isProfessionalMode && this.professionalEngine.isReady) {
+        this.professionalEngine.setGain(value);
+      }
+      
+      // Also set basic gain
+      if (this.gainNode) {
+        this.gainNode.gain.value = value;
+      }
+    } catch (error) {
+      if (error.name === 'ValidationError') {
+        errorHandler.logError(error, { 
+          component: 'AudioEngine', 
+          method: 'setGain',
+          value: value
+        });
+      } else {
+        const audioError = new AudioError(
+          'Failed to set gain',
+          'GAIN_SET_FAILED',
+          { value, originalError: error.message }
+        );
+        errorHandler.logError(audioError, { component: 'AudioEngine', method: 'setGain' });
+      }
     }
   }
 
@@ -312,14 +350,38 @@ class AudioEngine {
 
   // New methods for professional features
   updateEQ(band, frequency, gain, Q = 0.7) {
-    if (this.isProfessionalMode && this.professionalEngine.isReady) {
-      this.professionalEngine.updateEQ(band, frequency, gain, Q);
+    try {
+      AudioValidator.validateEQParameters(band, frequency, gain, Q);
+      
+      if (this.isProfessionalMode && this.professionalEngine.isReady) {
+        this.professionalEngine.updateEQ(band, frequency, gain, Q);
+      }
+    } catch (error) {
+      if (error.name === 'ValidationError') {
+        errorHandler.logError(error, { 
+          component: 'AudioEngine', 
+          method: 'updateEQ',
+          parameters: { band, frequency, gain, Q }
+        });
+      }
     }
   }
 
   updateCompressor(threshold, ratio, attack, release, knee) {
-    if (this.isProfessionalMode && this.professionalEngine.isReady) {
-      this.professionalEngine.updateCompressor(threshold, ratio, attack, release, knee);
+    try {
+      AudioValidator.validateCompressorParameters(threshold, ratio, attack, release, knee);
+      
+      if (this.isProfessionalMode && this.professionalEngine.isReady) {
+        this.professionalEngine.updateCompressor(threshold, ratio, attack, release, knee);
+      }
+    } catch (error) {
+      if (error.name === 'ValidationError') {
+        errorHandler.logError(error, { 
+          component: 'AudioEngine', 
+          method: 'updateCompressor',
+          parameters: { threshold, ratio, attack, release, knee }
+        });
+      }
     }
   }
 

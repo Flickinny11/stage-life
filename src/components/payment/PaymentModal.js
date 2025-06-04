@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import StripePayment from '../../payment/StripePayment';
+import { errorHandler, PaymentError, PaymentValidator } from '../../utils/ErrorHandling';
 import './PaymentModal.css';
 
 function PaymentModal({ isOpen, onClose, onPaymentSuccess }) {
@@ -45,6 +46,20 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess }) {
 
   // Fallback methods for demo mode when Stripe is not available
   const processSimulatedPayment = async () => {
+    // Validate form data
+    try {
+      PaymentValidator.validateEmail(formData.email);
+      PaymentValidator.validateName(formData.name);
+    } catch (validationError) {
+      setError(validationError.message);
+      errorHandler.logError(validationError, { 
+        component: 'PaymentModal', 
+        method: 'processSimulatedPayment',
+        formData: { email: formData.email, name: formData.name }
+      });
+      return;
+    }
+
     setIsProcessing(true);
     
     try {
@@ -70,14 +85,40 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess }) {
       onClose();
     } catch (error) {
       console.error('Simulated payment failed:', error);
+      
+      const paymentError = new PaymentError(
+        'Payment simulation failed. Please try again.',
+        'DEMO_PAYMENT_FAILED',
+        { originalError: error.message }
+      );
+      
+      errorHandler.logError(paymentError, { 
+        component: 'PaymentModal', 
+        method: 'processSimulatedPayment'
+      });
+      
       setIsProcessing(false);
-      setError('Payment simulation failed. Please try again.');
+      setError(paymentError.message);
     }
   };
 
   const processPayment = async () => {
     if (!stripePayment || !stripePayment.isReady) {
       setError('Payment system not ready');
+      return;
+    }
+
+    // Validate form data
+    try {
+      PaymentValidator.validateEmail(formData.email);
+      PaymentValidator.validateName(formData.name);
+    } catch (validationError) {
+      setError(validationError.message);
+      errorHandler.logError(validationError, { 
+        component: 'PaymentModal', 
+        method: 'processPayment',
+        formData: { email: formData.email, name: formData.name }
+      });
       return;
     }
 
@@ -108,11 +149,27 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess }) {
         onPaymentSuccess(result.activationKey);
         onClose();
       } else {
-        throw new Error('Payment failed');
+        throw new PaymentError('Payment processing failed', 'PAYMENT_FAILED');
       }
     } catch (error) {
       console.error('Payment failed:', error);
-      setError(error.message || 'Payment failed. Please try again.');
+      
+      const paymentError = new PaymentError(
+        error.message || 'Payment failed. Please try again.',
+        error.code || 'UNKNOWN_ERROR',
+        { 
+          customerEmail: formData.email,
+          amount: 900,
+          originalError: error
+        }
+      );
+      
+      errorHandler.logError(paymentError, { 
+        component: 'PaymentModal', 
+        method: 'processPayment'
+      });
+      
+      setError(paymentError.message);
       setIsProcessing(false);
     }
   };
